@@ -29,11 +29,14 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "commitlint": "^19.6.1",
     "eslint": "^9.17.0",
     "eslint-config-next": "15.1.2",
     "eslint-config-prettier": "^9.1.0",
