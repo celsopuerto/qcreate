@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import QRCode from "qrcode";
 import { useTheme } from "next-themes";
@@ -13,12 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Link from "next/link";
 
 export default function QRForm() {
   const { theme } = useTheme();
   const [input, setInput] = useState("");
   const [qrCode, setQrCode] = useState("");
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [fgColor, setFgColor] = useState("#000000");
   const [bgColor, setBgColor] = useState("#FFFFFF");
   const errorCorrectionOptions = [
@@ -41,13 +42,10 @@ export default function QRForm() {
   const [quality, setQuality] = useState(0.3);
   const [margin, setMargin] = useState(1);
 
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    if (!input) {
+  const handleGenerate = useCallback(async () => {
+    // setLoading(true);
+    if (!input.trim()) {
       toast.error("Please enter some text or a URL.");
-      setLoading(false);
       return;
     }
 
@@ -65,17 +63,19 @@ export default function QRForm() {
       };
 
       const qrCodeData = await QRCode.toDataURL(input, options);
-
       setQrCode(qrCodeData);
-      console.log("button clicked");
-      toast.success("Qreate generated successfully.");
+      // setLoading(false);
     } catch (error) {
-      toast.error("Qreate generation failed.");
-      console.log(error);
-    } finally {
-      setLoading(false);
+      toast.error("QR code generation failed.");
+      console.error("Error generating QR code:", error);
     }
-  };
+  }, [input, errorCorrection, type, quality, margin, fgColor, bgColor, width]);
+
+  useEffect(() => {
+    if (input.trim()) {
+      handleGenerate();
+    }
+  }, [handleGenerate, input]);
 
   const handleErrorCorrectionChange = (value: "L" | "M" | "Q" | "H") => {
     setErrorCorrection(value);
@@ -85,6 +85,17 @@ export default function QRForm() {
     );
   };
 
+  const downloadQRCode = () => {
+    if (qrCode) {
+      const extension = type.split("/")[1]; // Extract the file extension from the type (e.g., "image/jpeg" -> "jpeg")
+      const link = document.createElement("a");
+      link.href = qrCode;
+      link.download = `qrcode.${extension}`;
+      link.click();
+      toast.success("Downloaded Successfully");
+    }
+  };
+
   return (
     <form onSubmit={handleGenerate}>
       <div className="flex flex-row gap-5 w-full max-w-[900px] mt-10 mx-auto p-6 bg-white dark:bg-zinc-950 rounded-lg shadow-md">
@@ -92,7 +103,12 @@ export default function QRForm() {
           <div className="text-center">
             <h1 className="text-2xl font-bold">QR Code Generator</h1>
             <p className="text-gray-500 dark:text-gray-400">
-              Enter text or a URL to generate a QR code.
+              Developer -
+              <Button variant="link">
+                <Link href="https://github.com/celsopuerto" target="_blank">
+                  celsopdev
+                </Link>
+              </Button>
             </p>
           </div>
           <div className="space-y-2">
@@ -198,22 +214,30 @@ export default function QRForm() {
               />
             </div>
           </div>
-
+          {/* 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Generating..." : "Generate QR Code"}
-          </Button>
+          </Button> */}
         </div>
-        <div className="flex justify-center w-full">
+        <div className="relative flex justify-center w-full">
           {qrCode ? (
-            <img
-              src={qrCode}
-              alt="QR Code"
-              className="border border-zinc-200 dark:border-zinc-800 rounded-lg"
-            />
+            <>
+              <img
+                src={qrCode}
+                alt="QR Code"
+                className="border border-zinc-200 dark:border-zinc-800 rounded-lg"
+              />
+              <Button
+                className="absolute bottom-4 left-1/2 transform -translate-x-1/2 border border-zinc-400 dark:border-zinc-700 bg-zinc-200 hover:bg-zinc-300 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-950 dark:text-zinc-50 py-2 px-4 rounded-lg shadow-md"
+                onClick={downloadQRCode}
+              >
+                Download QR Code
+              </Button>
+            </>
           ) : (
             <img
               src={
-                theme === "dark" ? "placeholder-dark.png" : "placeholder.png"
+                theme === "light" ? "placeholder.png" : "placeholder-dark.png"
               }
               alt="QR Code"
               className="w-full h-auto object-contain"
