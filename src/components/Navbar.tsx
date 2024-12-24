@@ -7,6 +7,8 @@ import ModeToggle from "@/components/ThemeToggle";
 import { Button } from "./ui/button";
 // import toast from "react-hot-toast";
 
+// Attendance 1
+
 const Navbar = () => {
   // const router = useRouter();
 
